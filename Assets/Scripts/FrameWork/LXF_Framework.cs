@@ -1613,13 +1613,12 @@ namespace LXF_Framework
     #region AudioKit
     [DefaultExecutionOrder(-1)]
     public abstract class LXF_AudioKit : LXF_Singleton<LXF_AudioKit>{
-        private AudioSource _audioSource;
+        private AudioSource[] _allSources;  
         protected Dictionary<string,AudioClip> audioSources = new();
         protected new virtual void Awake()
         {
             base.Awake();
             Init();
-            _audioSource=gameObject.AddComponent<AudioSource>();
         }
 
         protected abstract void Init();
@@ -1629,12 +1628,24 @@ namespace LXF_Framework
                 return;
             }
             AudioClip audioClip=audioSources[audioClipName];
-            _audioSource.clip=audioClip;
-            _audioSource.Play();
+            var s =GetAudioSource();
+            s.clip=audioClip;
+            s.Play();
         }
 
         protected void AddAudioClip(string audioClipName,AudioClip audioClip){
             audioSources.Add(audioClipName,audioClip);
+        }
+
+        private AudioSource GetAudioSource(){
+            _allSources = gameObject.GetComponents<AudioSource>();
+            foreach(var source in _allSources){
+                if(!source.isPlaying){
+                    return source;
+                }
+            }
+
+            return gameObject.AddComponent<AudioSource>();
         }
     }
     #endregion
